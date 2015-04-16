@@ -24,6 +24,7 @@ import bibleReader.model.ArrayListBible;
 import bibleReader.model.Bible;
 import bibleReader.model.BibleReaderModel;
 import bibleReader.model.ReferenceList;
+import bibleReader.model.TreeMapBible;
 import bibleReader.model.VerseList;
 
 /**
@@ -57,7 +58,6 @@ public class BibleReaderApp extends JFrame {
 	private JMenuItem fileMenuOpen;
 	private JMenuItem helpMenuAbout;
 
-
 	/**
 	 * Default constructor. We may want to replace this with a different one.
 	 */
@@ -66,24 +66,21 @@ public class BibleReaderApp extends JFrame {
 		
 		File kjvFile     = new File("kjv.atv");
 		VerseList kjvVerses = BibleIO.readBible(kjvFile);
-		Bible kjv        = new ArrayListBible(kjvVerses);
+		Bible kjv        = new TreeMapBible(kjvVerses);
 		model.addBible(kjv);
+
+		File asvFile     = new File("asv.xmv");
+		VerseList asvVerses = BibleIO.readBible(asvFile);
+		Bible asv        = new TreeMapBible(asvVerses);
+		model.addBible(asv);
 		
 		File esvFile     = new File("esv.atv");
 		VerseList esvVerses = BibleIO.readBible(esvFile);
-		Bible esv        = new ArrayListBible(esvVerses);
+		Bible esv        = new TreeMapBible(esvVerses);
 		model.addBible(esv);
+
 		
-		File asvFile     = new File("asv.xmv");
-		VerseList asvVerses = BibleIO.readBible(asvFile);
-		Bible asv        = new ArrayListBible(asvVerses);
-		model.addBible(asv);
 		
-		// Add all bibles
-		/*File asvFile = new File("asv.xmv");
-		File esvFile = new File("esv.atv");
-		model.addBible(new ArrayListBible(BibleIO.readBible(asvFile)));
-		model.addBible(new ArrayListBible(BibleIO.readBible(esvFile)));*/
 
 		resultView = new ResultView(model);
 
@@ -160,7 +157,7 @@ public class BibleReaderApp extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String searchText = textField.getText().trim();
-				ReferenceList list = model.getReferencesContaining(searchText);
+				ReferenceList list = model.getReferencesContainingAllWordsAndPhrases(searchText);
 				resultView.displaySearchResults(list, searchText);
 			}
 		});

@@ -12,10 +12,10 @@ import java.lang.UnsupportedOperationException;
 public class BibleFactory {
 
 	public static Bible createBible(VerseList verses) {
-		return new ArrayListBible(verses);
-		//return new TreeMapBible(verses);
+		//return new ArrayListBible(verses);
+		return new TreeMapBible(verses);
 	}
 	public static Concordance createConcordance(Bible bible) {
-		throw new UnsupportedOperationException();
+		return new Concordance(bible);
 	}
 }

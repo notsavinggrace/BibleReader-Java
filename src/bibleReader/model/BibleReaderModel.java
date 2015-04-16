@@ -1,8 +1,11 @@
 package bibleReader.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The model of the Bible Reader. It stores the Bibles and has methods for
@@ -12,6 +15,7 @@ import java.util.regex.*;
  */
 public class BibleReaderModel implements MultiBibleModel {
 	private final TreeMap<String, Bible> bibles;
+	private final HashMap<String, Concordance> concordances;
 
 	/**
 	 * Default constructor. You probably need to instantiate objects and do
@@ -19,6 +23,7 @@ public class BibleReaderModel implements MultiBibleModel {
 	 */
 	public BibleReaderModel() {
 		bibles = new TreeMap<String, Bible>();
+		concordances = new HashMap<String, Concordance>();
 	}
 
 	@Override
@@ -34,6 +39,10 @@ public class BibleReaderModel implements MultiBibleModel {
 	@Override
 	public void addBible(Bible bible) {
 		bibles.put(bible.getVersion(), bible);
+		
+		Concordance c = BibleFactory.createConcordance(bible);
+		
+		concordances.put(bible.getVersion(), c);
 	}
 
 	@Override
@@ -62,23 +71,79 @@ public class BibleReaderModel implements MultiBibleModel {
 		}
 		return new ReferenceList(references);
 	}
-
+	
+	// stage 12
 	@Override
 	public ReferenceList getReferencesContainingWord(String word) {
-		// TODO Implement me: Stage 12
-		return null;
+		// single word
+		if (word.split(" ").length > 1) return new ReferenceList();
+		
+		TreeSet<Reference> results = new TreeSet<Reference>();
+		for (String version : bibles.keySet()) {
+			results.addAll(concordances.get(version).getReferencesContaining(word));
+		}
+		
+		return new ReferenceList(results);
 	}
 
 	@Override
 	public ReferenceList getReferencesContainingAllWords(String words) {
-		// TODO Implement me: Stage 12
-		return null;
+		TreeSet<Reference> results = new TreeSet<Reference>();
+		
+		ArrayList<String> wordsList = Concordance.extractWords(words);
+		for (String version : bibles.keySet()) {
+			results.addAll(concordances.get(version).getReferencesContainingAll(wordsList));
+		}
+		
+		return new ReferenceList(results);
 	}
 
 	@Override
 	public ReferenceList getReferencesContainingAllWordsAndPhrases(String words) {
-		// TODO Implement me: Stage 12
-		return null;
+		TreeSet<Reference> result = new TreeSet<Reference>();
+		
+		words = words.trim();
+		if (words.split("\"").length > 0) {
+			// has quotes
+			
+			ArrayList<TreeSet<Reference>> results = new ArrayList<TreeSet<Reference>>();
+			
+			for (String phrase : words.split("\"")) {
+				phrase = phrase.trim();
+				for (String word : phrase.split(" ")) {
+					if (!word.equals("")) {
+						TreeSet<Reference> singleResult = new TreeSet<Reference>();
+						for (String version : bibles.keySet()) {
+							singleResult.addAll(concordances.get(version).getReferencesContaining(word));
+						}
+						results.add(singleResult);
+					}
+				}
+			}
+			
+			if (results.size() == 0) return new ReferenceList();
+			if (results.size() == 1) return new ReferenceList(results.get(0));
+			
+			System.out.println("retainall");
+			TreeSet<Reference> firstResult = results.get(0);
+			for (TreeSet<Reference> aResult : results) {
+				if (aResult != results.get(0)) {
+					firstResult.retainAll(aResult);
+				}
+			}
+			
+			result = firstResult;
+			
+		}
+		else if (words.split(" ").length == 1) {
+			// single word
+			result.addAll(getReferencesContainingWord(words));
+		}
+		else {
+			// multi worded
+			result.addAll(getReferencesContainingAllWords(words));
+		}
+		return new ReferenceList(result);
 	}
 
 	public static Pattern bookPattern = Pattern

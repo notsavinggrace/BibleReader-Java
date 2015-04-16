@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import bibleReader.model.Bible;
 import bibleReader.model.BibleFactory;
 import bibleReader.model.BookOfBible;
+import bibleReader.model.Concordance;
 import bibleReader.model.Reference;
 import bibleReader.model.Verse;
 import bibleReader.model.VerseList;
@@ -59,11 +60,9 @@ public class BibleIO {
 			String[] split = in.split(": ");
 			VerseList list;
 			if (split.length == 2) {
-				System.out.println("Split 1");
 				list = new VerseList(split[0], split[1]);
 			}
 			else {
-				System.out.println("Split 2 "+split.length);
 				list = new VerseList(in, "");
 			}
 			

@@ -226,7 +226,12 @@ public class ResultView extends JPanel {
 					buffer.append("<td>");
 					// Replace every occurrence of foo with <b>foo</b> in the String
 					// phrase regardless of the case.
-					buffer.append(bibleModel.getText(version, r).replaceAll("(?i)"+searchPhrase, "<b>$0</b>"));
+					//buffer.append(bibleModel.getText(version, r).replaceAll("(?i)"+searchPhrase, "<b>$0</b>"));
+					String text = bibleModel.getText(version, r).replaceAll("(?i)(?<!\\w)"+searchPhrase+"(?!\\w)", "<b>$0</b>");
+					for (String word : searchPhrase.split(" ")) {
+						text = text.replaceAll("(?i)(?<!\\w)"+word+"(?!\\w)", "<b>$0</b>");
+					}
+					buffer.append(text);
 					buffer.append("</td>");
 				}
 				buffer.append("</tr>");
