@@ -102,44 +102,93 @@ public class BibleReaderModel implements MultiBibleModel {
 	public ReferenceList getReferencesContainingAllWordsAndPhrases(String words) {
 		TreeSet<Reference> result = new TreeSet<Reference>();
 		
-		words = words.trim();
-		if (words.split("\"").length > 0) {
+		//System.out.println("Phrase:              "+words);
+		//words = words.trim().toLowerCase();
+		//System.out.println("ToLowerCase+Trimmed: "+words);
+		if (words.split("\"").length > 1) {
 			// has quotes
+			System.out.println("quoted search:"+words);
 			
 			ArrayList<TreeSet<Reference>> results = new ArrayList<TreeSet<Reference>>();
 			
 			for (String phrase : words.split("\"")) {
-				phrase = phrase.trim();
-				for (String word : phrase.split(" ")) {
-					if (!word.equals("")) {
-						TreeSet<Reference> singleResult = new TreeSet<Reference>();
-						for (String version : bibles.keySet()) {
-							singleResult.addAll(concordances.get(version).getReferencesContaining(word));
+				phrase.trim(); // doesnt catch some only whitespace strings
+				if (!phrase.matches("([^a-zA-Z]|\\s*)")) {
+					System.out.println("Searching for quote \""+phrase+"\"");
+					ReferenceList r = getReferencesContainingAllWords(phrase.toLowerCase());
+					
+					TreeSet<Reference> singleResult = new TreeSet<Reference>();
+					phrase = phrase.replaceAll("\"", "");
+					for (String version : bibles.keySet()) {
+						for (Verse v : getVerses(version, r)) {
+							if (v != null) {
+								String text = v.getText().toLowerCase();
+								if (text.contains(phrase) || text.contains(phrase.toLowerCase())) {
+									singleResult.add(v.getReference());
+								}
+							}
 						}
-						results.add(singleResult);
 					}
+					System.out.println("Results: "+singleResult.size());
+					
+					results.add(singleResult);
 				}
 			}
+			
+			System.out.println("Ended up with "+results.size()+" sets of results.");
 			
 			if (results.size() == 0) return new ReferenceList();
 			if (results.size() == 1) return new ReferenceList(results.get(0));
 			
-			System.out.println("retainall");
 			TreeSet<Reference> firstResult = results.get(0);
 			for (TreeSet<Reference> aResult : results) {
-				if (aResult != results.get(0)) {
+				if (aResult != firstResult) {
+					
 					firstResult.retainAll(aResult);
+					System.out.println("After retainAll: "+firstResult.size());
+					
 				}
 			}
 			
 			result = firstResult;
 			
+				/*
+				if (phraseResults.size() == 1) {
+					results.add(phraseResults.get(0));
+					System.out.println(phrase+" "+phraseResults.get(0)+" <- was only one.");
+				}
+				else if (phraseResults.size() > 1) {
+					TreeSet<Reference> firstResult = phraseResults.get(0);
+					for (TreeSet<Reference> aResult : phraseResults) {
+						if (aResult != firstResult) {
+							firstResult.retainAll(aResult);
+						}
+					}
+					
+					ReferenceList finalResults = new ReferenceList();
+					for (String version : bibles.keySet()) {
+						for (Verse v : getVerses(version, new ReferenceList(firstResult))) {
+							if (v.getText().contains(phrase.replaceAll("\"", ""))) {
+								finalResults.add(v.getReference());
+							}
+						}
+					}
+					
+					results.add(new TreeSet<Reference>(finalResults));
+				}
+			}
+			
+			
+			
+			*/
 		}
 		else if (words.split(" ").length == 1) {
+			System.out.println("single word search:"+words);
 			// single word
 			result.addAll(getReferencesContainingWord(words));
 		}
 		else {
+			System.out.println("multi word search:"+words);
 			// multi worded
 			result.addAll(getReferencesContainingAllWords(words));
 		}

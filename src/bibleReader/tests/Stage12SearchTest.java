@@ -147,7 +147,7 @@ public class Stage12SearchTest {
 	//---------------------------------------------------------------------------------------------------
 	// Tests for searching for more than one word at a time
 	//---------------------------------------------------------------------------------------------------
-	@Test//(timeout = 250)
+	@Test(timeout = 250)
 	public void testGetReferenceContainingWithNoResults_MW() {
 		ReferenceList results = model.getReferencesContainingAllWords("fig tree blossom earth");
 		assertEquals(0, results.size());

@@ -83,6 +83,7 @@ public class Concordance {
 			results.add(result);
 		}
 		
+		if (results.size() == 0) return new ReferenceList();
 		if (results.size() == 1) return new ReferenceList(results.get(0));
 		
 		TreeSet<Reference> firstResult = results.get(0);
