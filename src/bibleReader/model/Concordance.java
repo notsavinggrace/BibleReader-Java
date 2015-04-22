@@ -58,8 +58,7 @@ public class Concordance {
 			return new ReferenceList();
 		}
 		HashSet<Reference> h = index.get(word);
-		TreeSet<Reference> results = new TreeSet<Reference>(h);
-		return new ReferenceList(results);
+		return new ReferenceList(h);
 	}
 
 	/**
